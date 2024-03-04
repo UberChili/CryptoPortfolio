@@ -1,0 +1,32 @@
+{{ define "title" }}
+Quote
+{{ end }}
+
+{{ define "content" }}
+<form action="/quote/" method="post">
+    <div class="mb-3">
+        <p>
+            {{if .Results.Name }}
+            One {{ .Results.Name }} (Symbol {{ .Results.Symbol }}) is worth ${{ .Results.Price }}
+
+            <!-- <script src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js"></script> -->
+            <!-- <coingecko-coin-ticker-widget  coin-id={{ .Results.Slug }} currency="usd" locale="en" width="0"></coingecko-coin-ticker-widget> -->
+
+            {{ else }}
+            Couldn't find that coin. Try with another.
+            {{ end }}
+        </p>
+    </div>
+</form>
+{{ end }}
+
+
+<!-- <html lang="en"> -->
+<!--     <form action="/quote/" method="post"> -->
+<!--         <div class="mb-3"> -->
+<!--             <p> -->
+<!--                 One {{ .Results.Name }} is worth ${{ .Results.Price }} -->
+<!--             </p> -->
+<!--         </div> -->
+<!--     </form> -->
+<!-- </html> -->

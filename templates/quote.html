@@ -1,0 +1,23 @@
+{{ define "title" }}
+Quote
+{{ end }}
+
+{{ define "content" }}
+<form action="/quote/" method="post">
+    <div class="mb-3">
+        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="slug" name="slug" placeholder="Name" type="text">
+    </div>
+    <button class="btn btn-primary" type="submit">Quote</button>
+</form>
+{{ end }}
+
+
+<!-- <!DOCTYPE html> -->
+<!-- <html lang="en"> -->
+<!--   <form action="/quote/" method="post"> -->
+<!--       <div class="mb-3"> -->
+<!--           <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="slug" name="slug" placeholder="Name" type="text"> -->
+<!--       </div> -->
+<!--       <button class="btn btn-primary" type="submit">Quote</button> -->
+<!--   </form> -->
+<!-- </html> -->
