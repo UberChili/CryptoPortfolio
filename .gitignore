@@ -2,3 +2,4 @@ stocks.go
 *.go.bak
 main
 finance.db
+*_main.go
