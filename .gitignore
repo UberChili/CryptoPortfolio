@@ -1,2 +1,4 @@
 stocks.go
 *.go.bak
+main
+finance.db
