@@ -27,7 +27,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// tmpl.Execute(w, nil)
-	tmpl.Execute(w, session)
+	fmt.Println(session.Values["user_id"])
+	tmpl.Execute(w, session.Values)
 }
 
 // Function to Quote cryptocurrencies
