@@ -1,8 +1,16 @@
 {{ define "title" }}
-Login
+  Login
 {{ end }}
 {{ define "content" }}
     <form action="/login/" method="post">
+      {{ if .Message }}
+        <p>
+            {{ .Message }}.
+        </p>
+        <p>
+            Please try again.
+        </p>
+      {{ end }}
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
         </div>

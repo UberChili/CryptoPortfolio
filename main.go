@@ -8,14 +8,26 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/context"
+	"github.com/gorilla/sessions"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
 
+var store = sessions.NewCookieStore([]byte("super-secret"))
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/index.html"))
-	tmpl.Execute(w, nil)
+	session, _ := store.Get(r, "session")
+	_, ok := session.Values["user_id"]
+	if !ok {
+		http.Redirect(w, r, "/login/", http.StatusFound)
+		return
+	}
+
+	// tmpl.Execute(w, nil)
+	tmpl.Execute(w, session)
 }
 
 // Function to Quote cryptocurrencies
@@ -53,24 +65,54 @@ func quoteHandler(w http.ResponseWriter, r *http.Request) {
 
 // Function to handle the login page
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" { // User reached route via POST (as by submitting a form via POST)
-		// Ensure user provided username and password
-		err := r.ParseForm()
-		if err != nil {
-			fmt.Println("Error parsing!")
-			return
-		}
-		name := r.PostFormValue("username")
-		pass := r.PostFormValue("password")
-		if name == "" || pass == "" {
-			fmt.Println("Must provide username and password.")
-			return
-		}
-		// fmt.Println(name, pass)
-	} else { // User reached route via GET (as by clicking a link or via redirect)
-		tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/login.html"))
+	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/login.html"))
+
+	if r.Method != "POST" { // User reached route via GET
 		tmpl.Execute(w, nil)
+		return
 	}
+	// User reached route via POST (as by submitting a form via PSOT)
+	// Ensure user provided username and password
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Println("Error parsing!")
+		return
+	}
+	user := r.PostFormValue("username")
+	pass := r.PostFormValue("password")
+	if user == "" || pass == "" {
+		http.Error(w, "Error parsing form", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user exists
+	// stmt := "SELECT id FROM users WHERE username = ?"
+	stmt := "SELECT id, username, hash FROM users WHERE username = ?"
+	row := db.QueryRow(stmt, user)
+	var id, username, hash string
+	err_scan := row.Scan(&id, &username, &hash)
+	if err_scan == sql.ErrNoRows {
+		fmt.Println("User does not exist")
+		err_message := "User does not exist"
+		Message := map[string]string{"Message": err_message}
+		tmpl.Execute(w, Message)
+		return
+	}
+	// Check if password is correct.
+	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(pass))
+	if err != nil {
+		fmt.Println("Password is incorrect")
+		err_message := "Incorrect username or password"
+		Message := map[string]string{"Message": err_message}
+		tmpl.Execute(w, Message)
+		return
+	}
+	// Logging in was succes, save session and redirect to index
+	session, _ := store.Get(r, "session")
+	session.Values["user_id"] = id
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return
 }
 
 // Function to handle the register page
@@ -168,5 +210,6 @@ func main() {
 	http.HandleFunc("/register/", registerHandler)
 
 	log.Println("App running on 8000...")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	// log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe("localhost:8000", context.ClearHandler(http.DefaultServeMux)))
 }
